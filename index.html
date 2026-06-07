@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cafino Cafe Jaffna — Bill / Invoice Generator</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ============================================================
+       CONTROL PANEL (NOT printed)
+       ============================================================ -->
+  <aside class="panel no-print" aria-label="Bill controls">
+    <div class="panel__head">
+      <img class="logo-mini" src="cafino-logo.png" alt="Cafino logo" />
+      <div>
+        <h2>Billing Console</h2>
+        <p>Cafino Cafe Jaffna · POS</p>
+      </div>
+    </div>
+
+    <div class="panel__body">
+
+      <!-- Customer details -->
+      <div class="section-title">Customer Details</div>
+      <div class="grid-3">
+        <div class="field">
+          <label for="custName">Customer Name</label>
+          <input id="custName" type="text" placeholder="Walk-in Customer" oninput="syncPreview()" />
+        </div>
+        <div class="field">
+          <label for="custPhone">Phone Number</label>
+          <input id="custPhone" type="tel" inputmode="numeric" placeholder="07X XXX XXXX" oninput="onPhoneInput()" />
+          <span class="err" id="phoneErr"></span>
+        </div>
+        <div class="field">
+          <label for="cashier">Cashier Name</label>
+          <select id="cashier" onchange="syncPreview()">
+            <option value="">Select cashier…</option>
+            <option value="P.Manojan">P.Manojan</option>
+            <option value="Y.Vithushan">Y.Vithushan</option>
+            <option value="N.Vimal">N.Vimal</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Quick product menu (ONLY way to add items) -->
+      <div class="section-title">Quick Menu — Tap to Add</div>
+      <div class="menu-tools">
+        <input id="menuSearch" type="text" placeholder="Search products…" oninput="renderMenu()" />
+      </div>
+      <div class="menu-grid" id="menuGrid"></div>
+
+      <!-- Items (added from menu only) -->
+      <div class="section-title">Order Items</div>
+      <div class="items-editor" id="itemsEditor"></div>
+      <p class="hint" id="emptyOrderHint">No items yet — tap products from the Quick Menu above.</p>
+
+      <!-- Payment -->
+      <div class="section-title">Payment</div>
+      <div class="grid-2">
+        <div class="field">
+          <label for="payMethod">Payment Method</label>
+          <select id="payMethod" onchange="onPayMethodChange()">
+            <option value="Cash">Cash</option>
+            <option value="Online Payment">Online Payment</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="payStatus">Payment Status</label>
+          <select id="payStatus" onchange="calculate()">
+            <option value="Paid">Paid</option>
+            <option value="Pending">Pending</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Online/Card reference -->
+      <div class="field" id="refField" style="margin-top:12px; display:none;">
+        <label for="payRef">Payment Reference / Txn ID</label>
+        <input id="payRef" type="text" placeholder="e.g. ONL-48213 / last 4 card digits" oninput="syncPreview()" />
+      </div>
+
+      <!-- Amount paid (read-only, auto) -->
+      <div class="field" style="margin-top:12px;">
+        <label for="paid">Amount Paid (Rs.) — auto</label>
+        <input id="paid" type="text" value="Rs. 0.00" readonly class="readonly-input" />
+      </div>
+
+      <!-- Actions -->
+      <div class="actions">
+        <button class="btn btn--clear" type="button" onclick="clearBill()">↺ Clear Bill</button>
+        <button class="btn btn--print" type="button" onclick="printBill()">🧾 Export / Print E-Bill</button>
+      </div>
+      <p class="hint">Exporting opens the print dialog — choose “Save as PDF” to keep a copy.</p>
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       INVOICE PREVIEW (THIS PRINTS — thermal e-receipt)
+       ============================================================ -->
+  <main class="invoice" id="invoice" aria-label="Invoice preview">
+
+    <!-- Header -->
+    <header class="inv-head">
+      <img class="logo-img" src="cafino-logo.png" alt="Cafino Cafe Jaffna logo" />
+      <h1 class="serif">Cafino Cafe Jaffna</h1>
+      <div class="tagline">Premium Coffee • Fresh Food • Jaffna</div>
+      <div class="brand__contact">
+        Jaffna, Sri Lanka<br/>
+        +94 76 288 2931<br/>
+        cafinocafejaffna@gmail.com
+      </div>
+    </header>
+
+    <div class="inv-sub">E-BILL / INVOICE</div>
+
+    <!-- Meta -->
+    <section class="inv-meta">
+      <div><span class="k">Bill No</span><span class="v" id="pvBillNo">CAF-00000000-001</span></div>
+      <div><span class="k">Date</span><span class="v" id="pvDate">—</span></div>
+      <div><span class="k">Time</span><span class="v" id="pvTime">—</span></div>
+      <div><span class="k">Customer</span><span class="v" id="pvCust">Walk-in Customer</span></div>
+      <div><span class="k">Phone</span><span class="v" id="pvPhone">—</span></div>
+      <div><span class="k">Cashier</span><span class="v" id="pvCashier">—</span></div>
+    </section>
+
+    <div class="dash"></div>
+
+    <!-- Items -->
+    <section class="inv-body">
+      <table class="bill">
+        <thead>
+          <tr>
+            <th class="col-name">Item</th>
+            <th class="col-qty ctr">Qty</th>
+            <th class="col-price num">Price</th>
+            <th class="col-total num">Total</th>
+          </tr>
+        </thead>
+        <tbody id="pvItems">
+          <tr class="empty-row"><td colspan="4">No items added yet.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="dash"></div>
+
+    <!-- Totals -->
+    <section class="inv-summary">
+      <div class="t-row"><span class="lab">Items</span><span class="amt" id="pvCount">0</span></div>
+      <div class="grand"><span class="lab">TOTAL</span><span class="amt" id="pvGrand">Rs. 0.00</span></div>
+      <div class="t-row"><span class="lab">Amount Paid</span><span class="amt" id="pvPaid">Rs. 0.00</span></div>
+      <div class="t-row balance"><span class="lab" id="pvBalLab">Balance</span><span class="amt" id="pvBalance">Rs. 0.00</span></div>
+    </section>
+
+    <div class="dash"></div>
+
+    <!-- Payment block -->
+    <section class="inv-pay">
+      <div class="pay-line"><span class="k">Method</span><span class="v" id="pvMethod">Cash</span></div>
+      <div class="pay-line ref-row" id="pvRefRow" style="display:none;"><span class="k">Reference</span><span class="v" id="pvRef">—</span></div>
+      <div class="status-stamp" id="pvStatus">PAID</div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="inv-foot">
+      <div class="thanks serif">Thank you for visiting<br/>Cafino Cafe Jaffna</div>
+      <div class="again">Please come again ☕</div>
+      <div class="terms">Goods once sold are not refundable.<br/>Computer-generated e-bill — valid without signature.</div>
+    </footer>
+
+  </main>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

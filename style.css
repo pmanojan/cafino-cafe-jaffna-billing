@@ -1,0 +1,325 @@
+/* ============================================================
+   CAFINO CAFE JAFFNA — STYLES
+   Mobile-first, responsive. Print = thermal e-receipt.
+   Palette: dark brown, cream, gold, deep red, black, white
+   ============================================================ */
+
+:root {
+  --brown-900: #2b1d12;
+  --brown-800: #3a2718;
+  --brown-700: #4a3221;
+  --brown-600: #6b4a2e;
+  --gold-500:  #c9a24b;
+  --gold-400:  #d8b765;
+  --gold-200:  #ecdca9;
+  --red-700:   #9e2b2b;
+  --green-700: #1f7a4d;
+  --cream-100: #faf6ee;
+  --cream-200: #f3ecdd;
+  --ink:       #1c140d;
+  --muted:     #8a7a66;
+  --line:      #e3d8c4;
+  --white:     #ffffff;
+  --danger:    #b23a3a;
+  --shadow:    0 10px 30px rgba(43, 29, 18, 0.12);
+  --shadow-sm: 0 4px 14px rgba(43, 29, 18, 0.08);
+  --radius:    16px;
+  --radius-sm: 10px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  font-family: "Segoe UI", "Helvetica Neue", system-ui, -apple-system, Arial, sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(201,162,75,0.10), transparent 60%),
+    radial-gradient(1000px 500px at 110% 10%, rgba(107,74,46,0.10), transparent 55%),
+    var(--cream-200);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+.serif { font-family: Georgia, "Times New Roman", "Playfair Display", serif; }
+
+/* ---------- App layout: mobile-first single column ---------- */
+.app {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 14px 12px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ============================================================
+   CONTROL PANEL
+   ============================================================ */
+.panel {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.panel__head {
+  background: linear-gradient(135deg, var(--brown-900), var(--brown-700));
+  color: var(--cream-100);
+  padding: 14px 18px;
+  display: flex; align-items: center; gap: 12px;
+}
+.panel__head .logo-mini {
+  width: 44px; height: 44px; border-radius: 10px; object-fit: cover;
+  border: 1px solid var(--gold-200); flex: 0 0 auto;
+}
+.panel__head h2 { font-size: 1.02rem; font-weight: 700; }
+.panel__head p { font-size: .74rem; color: var(--gold-200); margin-top: 2px; }
+
+.panel__body { padding: 16px 16px 20px; }
+
+.section-title {
+  font-size: .72rem; text-transform: uppercase; letter-spacing: 1.4px;
+  color: var(--brown-600); font-weight: 700; margin: 18px 0 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-title:first-child { margin-top: 0; }
+.section-title::before { content: ""; width: 14px; height: 2px; background: var(--gold-500); border-radius: 2px; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.grid-3 { display: grid; grid-template-columns: 1fr; gap: 12px; }
+
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-size: .72rem; font-weight: 600; color: var(--muted); }
+.field input, .field select {
+  font: inherit; font-size: .95rem; padding: 11px 12px;
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--cream-100); color: var(--ink); width: 100%;
+  transition: border-color .15s, box-shadow .15s, background .15s;
+}
+.field input:focus, .field select:focus {
+  outline: none; border-color: var(--gold-500); background: var(--white);
+  box-shadow: 0 0 0 3px rgba(201,162,75,.18);
+}
+.field input.invalid { border-color: var(--danger); background: #fdf2f2; }
+.field .err { font-size: .68rem; color: var(--danger); min-height: 0; }
+.readonly-input {
+  background: var(--brown-800) !important; color: var(--gold-400) !important;
+  font-weight: 800 !important; cursor: not-allowed; border-color: var(--brown-700) !important;
+}
+
+/* ---- Quick product menu ---- */
+.menu-tools { margin-bottom: 10px; }
+.menu-tools input {
+  width: 100%; font: inherit; font-size: .9rem; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--cream-100);
+}
+.menu-tools input:focus { outline: none; border-color: var(--gold-500); box-shadow: 0 0 0 3px rgba(201,162,75,.18); }
+.menu-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  max-height: 260px; overflow-y: auto;
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--cream-100); padding: 10px;
+}
+.menu-btn {
+  text-align: left; cursor: pointer; border: 1px solid var(--line);
+  background: var(--white); border-radius: 10px; padding: 10px 11px;
+  display: flex; flex-direction: column; gap: 3px;
+  transition: border-color .12s, transform .08s, box-shadow .12s;
+  min-height: 54px;
+}
+.menu-btn:hover { border-color: var(--gold-500); box-shadow: var(--shadow-sm); }
+.menu-btn:active { transform: scale(.97); }
+.menu-btn .mb-name { font-size: .82rem; font-weight: 600; color: var(--brown-800); line-height: 1.2; }
+.menu-btn .mb-price { font-size: .78rem; font-weight: 800; color: var(--red-700); }
+.menu-empty { grid-column: 1/-1; text-align: center; color: var(--muted); font-size: .82rem; padding: 16px; font-style: italic; }
+
+/* ---- Order rows (qty +/- , locked name/price) ---- */
+.items-editor { display: flex; flex-direction: column; gap: 9px; }
+.order-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  align-items: center; gap: 10px;
+  padding: 10px 12px; border: 1px solid var(--line);
+  border-radius: var(--radius-sm); background: var(--cream-100);
+}
+.or-info { display: flex; flex-direction: column; min-width: 0; }
+.or-name { font-size: .9rem; font-weight: 700; color: var(--brown-800); }
+.or-price { font-size: .72rem; color: var(--muted); }
+.qty-ctrl { display: flex; align-items: center; gap: 6px; }
+.qbtn {
+  width: 30px; height: 30px; border: 1px solid var(--line); background: var(--white);
+  border-radius: 8px; font-size: 1.05rem; font-weight: 700; color: var(--brown-700);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background .12s, transform .08s;
+}
+.qbtn:hover { background: var(--gold-200); }
+.qbtn:active { transform: scale(.9); }
+.qval { min-width: 22px; text-align: center; font-weight: 800; color: var(--brown-900); }
+.or-total { font-weight: 800; color: var(--red-700); font-size: .88rem; white-space: nowrap; }
+.btn-remove {
+  height: 30px; width: 30px; border: none; border-radius: 8px;
+  background: rgba(178,58,58,.10); color: var(--danger); font-size: 1rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: background .15s, transform .1s;
+}
+.btn-remove:hover { background: rgba(178,58,58,.18); }
+.btn-remove:active { transform: scale(.92); }
+
+/* ---- Buttons ---- */
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+.btn {
+  font: inherit; font-weight: 700; font-size: .92rem; border: none; border-radius: 12px;
+  padding: 13px 16px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  transition: transform .1s, box-shadow .15s, filter .15s; flex: 1; min-width: 140px;
+}
+.btn:active { transform: translateY(1px); }
+.btn--clear { background: var(--white); color: var(--brown-700); border: 1px solid var(--line); }
+.btn--clear:hover { background: var(--cream-200); }
+.btn--print {
+  background: linear-gradient(135deg, var(--gold-500), var(--gold-400)); color: var(--brown-900);
+  box-shadow: 0 6px 18px rgba(201,162,75,.35);
+}
+.btn--print:hover { filter: brightness(1.05); box-shadow: 0 8px 22px rgba(201,162,75,.45); }
+.hint { font-size: .74rem; color: var(--muted); margin-top: 12px; text-align: center; }
+
+/* ============================================================
+   INVOICE / E-RECEIPT PREVIEW
+   ============================================================ */
+.invoice {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  max-width: 420px;        /* receipt feel */
+  width: 100%;
+  margin: 0 auto;
+}
+
+.inv-head {
+  background: linear-gradient(135deg, var(--brown-900) 0%, var(--brown-700) 70%);
+  color: var(--cream-100); text-align: center; padding: 22px 20px 18px;
+  position: relative;
+}
+.inv-head::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 4px;
+  background: linear-gradient(90deg, var(--gold-500), var(--gold-200), var(--gold-500));
+}
+.inv-head .logo-img {
+  width: 96px; height: 96px; border-radius: 14px; object-fit: cover;
+  border: 2px solid var(--gold-200); box-shadow: 0 6px 16px rgba(0,0,0,.3); margin-bottom: 10px;
+}
+.inv-head h1 { font-size: 1.4rem; color: var(--white); letter-spacing: .5px; }
+.inv-head .tagline { font-size: .72rem; color: var(--gold-200); letter-spacing: 1px; text-transform: uppercase; margin-top: 3px; }
+.inv-head .brand__contact { margin-top: 9px; font-size: .74rem; color: rgba(250,246,238,.85); line-height: 1.6; }
+
+.inv-sub {
+  text-align: center; font-weight: 800; letter-spacing: 3px; font-size: .8rem;
+  color: var(--brown-700); padding: 10px; background: var(--cream-100); border-bottom: 1px solid var(--line);
+}
+
+.inv-meta { padding: 12px 20px; font-size: .82rem; background: var(--white); }
+.inv-meta div { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; }
+.inv-meta .k { color: var(--muted); }
+.inv-meta .v { font-weight: 700; color: var(--brown-800); text-align: right; word-break: break-word; }
+
+.dash { border-top: 2px dashed var(--line); margin: 0 16px; }
+
+/* Items table */
+.inv-body { padding: 12px 16px 6px; }
+table.bill { width: 100%; border-collapse: collapse; font-size: .82rem; }
+table.bill thead th {
+  font-size: .66rem; text-transform: uppercase; letter-spacing: .5px;
+  color: var(--brown-700); border-bottom: 1.5px solid var(--line);
+  padding: 6px 4px; text-align: left; font-weight: 800;
+}
+table.bill thead th.num, table.bill td.num { text-align: right; }
+table.bill thead th.ctr, table.bill td.ctr { text-align: center; }
+table.bill tbody td { padding: 7px 4px; border-bottom: 1px dotted var(--line); color: var(--ink); vertical-align: top; }
+table.bill .item-name { font-weight: 600; color: var(--brown-800); }
+table.bill .empty-row td { text-align: center; color: var(--muted); padding: 20px; font-style: italic; }
+.col-qty { width: 40px; }
+.col-price, .col-total { width: 76px; }
+
+/* Totals */
+.inv-summary { padding: 10px 20px 4px; }
+.inv-summary .t-row {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: .85rem; padding: 5px 0;
+}
+.inv-summary .t-row .lab { color: var(--muted); }
+.inv-summary .t-row .amt { font-weight: 700; color: var(--brown-800); font-variant-numeric: tabular-nums; }
+.inv-summary .grand {
+  display: flex; justify-content: space-between; align-items: center;
+  margin: 8px 0; padding: 12px 14px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--brown-900), var(--brown-700));
+}
+.inv-summary .grand .lab { color: var(--gold-200); font-weight: 800; letter-spacing: 1px; font-size: .8rem; }
+.inv-summary .grand .amt { color: var(--gold-400); font-size: 1.25rem; font-weight: 800; }
+.inv-summary .balance .lab { color: var(--brown-700); font-weight: 700; }
+.inv-summary .balance .amt { color: var(--brown-900); }
+
+/* Payment block */
+.inv-pay { padding: 8px 20px 14px; text-align: center; }
+.inv-pay .pay-line { display: flex; justify-content: space-between; font-size: .82rem; padding: 3px 0; }
+.inv-pay .pay-line .k { color: var(--muted); }
+.inv-pay .pay-line .v { font-weight: 700; color: var(--brown-800); }
+.inv-pay .ref-row .v { font-family: monospace; }
+.status-stamp {
+  display: inline-block; margin-top: 10px; padding: 6px 22px; border-radius: 30px;
+  font-weight: 800; letter-spacing: 2px; font-size: .82rem; border: 2px solid;
+}
+.status-stamp.is-paid { color: var(--green-700); border-color: var(--green-700); background: rgba(31,122,77,.08); }
+.status-stamp.is-pending { color: var(--danger); border-color: var(--danger); background: rgba(178,58,58,.08); }
+
+/* Footer */
+.inv-foot { text-align: center; padding: 14px 20px 22px; background: var(--cream-100); border-top: 2px dashed var(--line); }
+.inv-foot .thanks { font-size: 1.05rem; font-weight: 700; color: var(--brown-800); }
+.inv-foot .again { font-size: .85rem; margin-top: 3px; color: var(--brown-600); }
+.inv-foot .terms { margin-top: 10px; font-size: .68rem; color: var(--muted); line-height: 1.5; }
+
+/* ============================================================
+   RESPONSIVE — wider screens get 2-column console + side preview
+   ============================================================ */
+@media (min-width: 720px) {
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .menu-grid { grid-template-columns: 1fr 1fr 1fr; }
+}
+@media (min-width: 980px) {
+  .app { display: grid; grid-template-columns: 1fr 420px; align-items: start; gap: 24px; }
+  .panel { position: sticky; top: 18px; }
+  .menu-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* Small phones */
+@media (max-width: 360px) {
+  .menu-grid { grid-template-columns: 1fr; }
+  .order-row { grid-template-columns: 1fr auto; row-gap: 8px; }
+  .or-total { grid-column: 1; }
+  .btn-remove { grid-column: 2; justify-self: end; }
+}
+
+/* ============================================================
+   PRINT — thermal e-receipt (80mm roll)
+   ============================================================ */
+@page { size: 80mm auto; margin: 4mm; }
+
+@media print {
+  html, body {
+    background: #fff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .app { display: block; max-width: 100%; padding: 0; margin: 0; gap: 0; }
+  .panel, .no-print { display: none !important; }
+
+  .invoice {
+    box-shadow: none !important; border: none !important; border-radius: 0 !important;
+    max-width: 100%; width: 100%; margin: 0;
+  }
+  /* Keep brand colors on print */
+  .inv-head, .inv-summary .grand, .status-stamp, .inv-sub, .dash,
+  table.bill thead th {
+    -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
+  }
+  .invoice, .inv-body, .inv-summary, .inv-foot, table.bill tr { page-break-inside: avoid; }
+}
