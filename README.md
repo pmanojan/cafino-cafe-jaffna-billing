@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/cafino-logo.png" alt="Cafino Cafe Jaffna" width="160" />
+<img src="cafino-logo.png" alt="Cafino Cafe Jaffna" width="160" />
 
 # ☕ Cafino Cafe Jaffna — Bill / Invoice Generator
 
