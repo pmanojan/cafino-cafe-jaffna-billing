@@ -12,7 +12,7 @@ const PRODUCTS = [
   ["Brownie", 170], ["Nanakothan", 25], ["Roll", 60], ["Chinna Patties", 40],
   ["Periya Patties", 60], ["Kilangu Rotti", 60], ["Rotti", 70], ["Samsa", 60],
   ["Mithivedi", 70], ["Vaappaan", 60], ["Kadalai Vadai", 50], ["Meentin Samsa", 70],
-  ["Meentin Mithivedi", 80], ["Poli", 100], ["Ulunthu Vadai", 60], ["Sandwich", 60],
+  ["Meentin Mithivedi", 80], ["Poli", 100], ["Ulunthu Vadai", 60], ["Sandwich", 80],
   ["Suchiyam", 60], ["Chicken Roll", 120], ["Pepsi 1.5L", 420], ["Pepsi 250ml", 120],
   ["Mirinda 250ml", 120], ["Ole 250ml", 120], ["String 250ml", 120], ["7up 250ml", 120],
   ["Water Bottle 250ml", 70], ["Water Bottle 1500ml", 130], ["Stix", 40], ["Rollo Cake", 80],
