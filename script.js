@@ -17,7 +17,8 @@ const PRODUCTS = [
   ["Mirinda 250ml", 120], ["Ole 250ml", 120], ["String 250ml", 120], ["7up 250ml", 120],
   ["Water Bottle 250ml", 70], ["Water Bottle 1500ml", 130], ["Stix", 40], ["Rollo Cake", 80],
   ["Tip Tip", 100], ["Go Choc Cake", 80], ["Cardamom Tea", 120], ["Nescoffee", 120],
-  ["Milo Small", 100], ["Milo Medium", 130], ["Veg cake", 1500]
+  ["Milo Small", 100], ["Milo Medium", 130], ["Veg cake", 1500], 
+  ["Roll+Cake+Sunquick with Bundle Pack", 200], ["Sunquick", 80]
 ];
 
 /* ---- In-memory order: { name, price, qty } ---- */
@@ -228,7 +229,7 @@ function clearBill() {
   if (!confirm("Clear all bill details and start a new bill?")) return;
   ORDER = [];
   ["custName","custPhone","payRef"].forEach(id => document.getElementById(id).value = "");
-  document.getElementById("cashier").value = "";
+  document.getElementById("cashier").value = "Cafino Cafe";
   document.getElementById("payMethod").value = "Cash";
   document.getElementById("payStatus").value = "Paid";
   document.getElementById("menuSearch").value = "";
