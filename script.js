@@ -1,13 +1,14 @@
 /* ============================================================
    CAFINO CAFE JAFFNA — BILLING LOGIC (vanilla JS)
-   - Items added ONLY via Quick Menu (name & price locked)
+   - Items added via Quick Menu or manually added
+   - Names & prices are fully editable in the order list
    - No discount/service/tax
    - Amount Paid auto (read-only) driven by Paid/Pending status
    - Sri Lankan phone validation
    - Thermal e-receipt print
    ============================================================ */
 
-/* ---- Product catalogue (name, price in Rs.) — prices are fixed ---- */
+/* ---- Product catalogue (name, price in Rs.) ---- */
 const PRODUCTS = [
   ["Brownie", 170], ["Nanakothan", 25], ["Roll", 60], ["Chinna Patties", 40],
   ["Periya Patties", 60], ["Kilangu Rotti", 60], ["Rotti", 70], ["Samsa", 60],
@@ -18,7 +19,8 @@ const PRODUCTS = [
   ["Water Bottle 250ml", 70], ["Water Bottle 1500ml", 130], ["Stix", 40], ["Rollo Cake", 80],
   ["Tip Tip", 100], ["Go Choc Cake", 80], ["Cardamom Tea", 120], ["Nescoffee", 120],
   ["Milo Small", 100], ["Milo Medium", 130], ["Veg cake", 1500], 
-  ["Roll+Cake+Sunquick with Bundle Pack", 200], ["Sunquick", 80]
+  ["Roll+Cake+Sunquick with Bundle Pack", 200], ["Sunquick", 80],
+  ["Boondi laddu", 80], ["Butter Non veg Cake", 1500]
 ];
 
 /* ---- In-memory order: { name, price, qty } ---- */
@@ -58,15 +60,11 @@ function setDateTime() {
     d.toLocaleTimeString("en-GB", { hour:"2-digit", minute:"2-digit" });
 }
 
-/* ---- Sri Lankan phone validation ----
-   Accepts: 0XXXXXXXXX (10 digits, starts 07/0xx) OR +94XXXXXXXXX / 94XXXXXXXXX
-   Mobile (07x) and landline (0xx) both allowed. */
+/* ---- Sri Lankan phone validation ---- */
 function validateLKPhone(raw) {
   const v = (raw || "").replace(/[\s-]/g, "");
-  if (v === "") return { ok: true, empty: true };            // empty allowed (walk-in)
-  // +94 or 94 followed by 9 digits, first of those not 0
+  if (v === "") return { ok: true, empty: true };
   const intl = /^\+?94[1-9]\d{8}$/;
-  // local 0 followed by 9 digits
   const local = /^0\d{9}$/;
   const ok = intl.test(v) || local.test(v);
   return { ok, empty: false };
@@ -101,7 +99,7 @@ function renderMenu() {
   }).join("");
 }
 
-/* Add a product to the order (qty +1 if already present). Price is fixed. */
+/* Add predefined product from catalogue */
 function addProduct(index) {
   const [name, price] = PRODUCTS[index];
   const existing = ORDER.find(it => it.name === name && it.price === price);
@@ -111,6 +109,27 @@ function addProduct(index) {
   calculate();
 }
 
+/* Add custom manual product */
+function addCustomItem() {
+  ORDER.push({ name: "Custom Item", price: 0, qty: 1 });
+  renderOrder();
+  calculate();
+}
+
+/* ---- Edit Order Handlers ---- */
+function updateItemName(i, newName) {
+  if (ORDER[i]) {
+    ORDER[i].name = newName;
+    calculate(); // update preview instantly
+  }
+}
+function updateItemPrice(i, newPrice) {
+  if (ORDER[i]) {
+    ORDER[i].price = num(newPrice);
+    renderOrder(); // re-render to update the row's total amount
+    calculate();
+  }
+}
 function changeQty(i, delta) {
   if (!ORDER[i]) return;
   ORDER[i].qty += delta;
@@ -124,7 +143,7 @@ function removeOrderItem(i) {
   calculate();
 }
 
-/* Render editable order rows (qty +/- + remove; name & price locked) */
+/* Render editable order rows */
 function renderOrder() {
   const box = document.getElementById("itemsEditor");
   const hint = document.getElementById("emptyOrderHint");
@@ -136,16 +155,18 @@ function renderOrder() {
   hint.style.display = "none";
   box.innerHTML = ORDER.map((it, i) => `
     <div class="order-row">
-      <div class="or-info">
-        <span class="or-name">${esc(it.name)}</span>
-        <span class="or-price">Rs. ${it.price.toFixed(2)} each</span>
+      <div class="or-info" style="display:flex; flex-direction:column; gap:4px; flex:1;">
+        <input type="text" class="or-name-input" value="${esc(it.name)}" onchange="updateItemName(${i}, this.value)" placeholder="Item Name" style="font-weight:bold; border:1px solid #ccc; padding:4px; border-radius:4px;" />
+        <div style="display:flex; align-items:center; font-size:0.9em; color:#555;">
+          Rs. <input type="number" min="0" step="0.01" class="or-price-input" value="${it.price}" onchange="updateItemPrice(${i}, this.value)" placeholder="Price" style="width:70px; border:1px solid #ccc; padding:2px; margin:0 4px; border-radius:4px;" /> each
+        </div>
       </div>
       <div class="qty-ctrl">
         <button type="button" class="qbtn" onclick="changeQty(${i}, -1)" aria-label="decrease">−</button>
         <span class="qval">${it.qty}</span>
         <button type="button" class="qbtn" onclick="changeQty(${i}, 1)" aria-label="increase">+</button>
       </div>
-      <span class="or-total">${rs(it.qty * it.price)}</span>
+      <span class="or-total" style="min-width:70px; text-align:right;">${rs(it.qty * it.price)}</span>
       <button type="button" class="btn-remove" title="Remove" onclick="removeOrderItem(${i})">✕</button>
     </div>
   `).join("");
@@ -167,36 +188,34 @@ function calculate() {
       </tr>`;
   });
 
-  const grand = subtotal; // no discount/service/tax
+  const grand = subtotal;
 
-  // Payment status drives Amount Paid (read-only)
-  const status = document.getElementById("payStatus").value; // Paid | Pending
+  const status = document.getElementById("payStatus")?.value || "Paid";
   const paid = status === "Paid" ? grand : 0;
-  const balance = grand - paid; // amount still due (0 when paid)
+  const balance = grand - paid;
 
-  // --- write order preview table ---
   const pvItems = document.getElementById("pvItems");
-  pvItems.innerHTML = previewRows.length
-    ? previewRows.join("")
-    : `<tr class="empty-row"><td colspan="4">No items added yet.</td></tr>`;
+  if(pvItems) {
+    pvItems.innerHTML = previewRows.length
+      ? previewRows.join("")
+      : `<tr class="empty-row"><td colspan="4">No items added yet.</td></tr>`;
+  }
 
-  // --- totals ---
-  document.getElementById("pvCount").textContent = itemCount;
-  document.getElementById("pvGrand").textContent = rs(grand);
-  document.getElementById("pvPaid").textContent  = rs(paid);
+  const setTxt = (id, txt) => { if(document.getElementById(id)) document.getElementById(id).textContent = txt; };
+  setTxt("pvCount", itemCount);
+  setTxt("pvGrand", rs(grand));
+  setTxt("pvPaid", rs(paid));
+  setTxt("pvBalLab", status === "Pending" ? "Balance Due" : "Balance");
+  setTxt("pvBalance", rs(balance));
 
-  // balance label changes with status
-  document.getElementById("pvBalLab").textContent = status === "Pending" ? "Balance Due" : "Balance";
-  document.getElementById("pvBalance").textContent = rs(balance);
+  const paidInput = document.getElementById("paid");
+  if(paidInput) paidInput.value = rs(paid);
 
-  // --- amount paid field (read-only console input) ---
-  document.getElementById("paid").value = rs(paid);
-
-  // --- status stamp ---
   const stampEl = document.getElementById("pvStatus");
-  stampEl.textContent = status.toUpperCase();
-  stampEl.className = "status-stamp " + (status === "Paid" ? "is-paid" : "is-pending");
-
+  if(stampEl) {
+    stampEl.textContent = status.toUpperCase();
+    stampEl.className = "status-stamp " + (status === "Paid" ? "is-paid" : "is-pending");
+  }
   syncPreview();
 }
 
@@ -210,59 +229,66 @@ function onPayMethodChange() {
 
 /* ---- Sync customer + payment text into preview ---- */
 function syncPreview() {
-  const t = id => document.getElementById(id).value.trim();
-  document.getElementById("pvCust").textContent    = t("custName")  || "Walk-in Customer";
-  document.getElementById("pvPhone").textContent   = t("custPhone") || "—";
-  document.getElementById("pvCashier").textContent = t("cashier")   || "—";
+  const t = id => document.getElementById(id) ? document.getElementById(id).value.trim() : "";
+  
+  const setTxt = (id, txt) => { if(document.getElementById(id)) document.getElementById(id).textContent = txt; };
+  setTxt("pvCust", t("custName") || "Walk-in Customer");
+  setTxt("pvPhone", t("custPhone") || "—");
+  setTxt("pvCashier", t("cashier") || "—");
 
-  const method = document.getElementById("payMethod").value;
-  document.getElementById("pvMethod").textContent = method;
+  const methodEl = document.getElementById("payMethod");
+  const method = methodEl ? methodEl.value : "Cash";
+  setTxt("pvMethod", method);
 
   const ref = t("payRef");
   const showRef = (method === "Online Payment" || method === "Card") && ref !== "";
-  document.getElementById("pvRefRow").style.display = showRef ? "" : "none";
-  document.getElementById("pvRef").textContent = ref || "—";
+  const refRow = document.getElementById("pvRefRow");
+  if(refRow) refRow.style.display = showRef ? "" : "none";
+  setTxt("pvRef", ref || "—");
 }
 
 /* ---- Clear / reset ---- */
 function clearBill() {
   if (!confirm("Clear all bill details and start a new bill?")) return;
   ORDER = [];
-  ["custName","custPhone","payRef"].forEach(id => document.getElementById(id).value = "");
-  document.getElementById("cashier").value = "Cafino Cafe";
-  document.getElementById("payMethod").value = "Cash";
-  document.getElementById("payStatus").value = "Paid";
-  document.getElementById("menuSearch").value = "";
-  document.getElementById("custPhone").classList.remove("invalid");
-  document.getElementById("phoneErr").textContent = "";
-  onPayMethodChange();
+  ["custName","custPhone","payRef"].forEach(id => {
+      if(document.getElementById(id)) document.getElementById(id).value = "";
+  });
+  if(document.getElementById("cashier")) document.getElementById("cashier").value = "Cafino Cafe";
+  if(document.getElementById("payMethod")) document.getElementById("payMethod").value = "Cash";
+  if(document.getElementById("payStatus")) document.getElementById("payStatus").value = "Paid";
+  if(document.getElementById("menuSearch")) document.getElementById("menuSearch").value = "";
+  
+  if(document.getElementById("custPhone")) document.getElementById("custPhone").classList.remove("invalid");
+  if(document.getElementById("phoneErr")) document.getElementById("phoneErr").textContent = "";
+  
+  if(document.getElementById("payMethod")) onPayMethodChange();
   renderMenu();
   renderOrder();
-  document.getElementById("pvBillNo").textContent = generateBillNumber();
+  if(document.getElementById("pvBillNo")) document.getElementById("pvBillNo").textContent = generateBillNumber();
   setDateTime();
   calculate();
 }
 
 /* ---- Print (thermal e-bill) ---- */
 function printBill() {
-  // Validate before printing
   if (!ORDER.length) { alert("Add at least one item before exporting the e-bill."); return; }
-  const phone = document.getElementById("custPhone").value;
-  if (!validateLKPhone(phone).ok) {
+  const phoneInput = document.getElementById("custPhone");
+  if (phoneInput && !validateLKPhone(phoneInput.value).ok) {
     alert("Please enter a valid Sri Lankan phone number, or leave it blank.");
-    document.getElementById("custPhone").focus();
+    phoneInput.focus();
     return;
   }
   calculate();
-  window.print(); // user saves as PDF / prints the thermal e-bill
+  window.print();
 }
 
 /* ---- Init ---- */
 window.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("pvBillNo").textContent = generateBillNumber();
+  if(document.getElementById("pvBillNo")) document.getElementById("pvBillNo").textContent = generateBillNumber();
   setDateTime();
-  renderMenu();
-  renderOrder();
-  onPayMethodChange();
+  if(document.getElementById("menuGrid")) renderMenu();
+  if(document.getElementById("itemsEditor")) renderOrder();
+  if(document.getElementById("payMethod")) onPayMethodChange();
   calculate();
 });
